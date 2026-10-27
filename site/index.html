@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="An unofficial Home Assistant integration with an Anam avatar. Learn how it works, install the experimental preview, and understand its privacy and control limits.">
+  <meta property="og:title" content="Anam Assist — a face for Home Assistant">
+  <meta property="og:description" content="An Anam avatar in your Home Assistant sidebar. Read home state and opt in to light control. Open-source, unofficial, and experimental.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://smidge.github.io/anam-assist/">
+  <link rel="canonical" href="https://smidge.github.io/anam-assist/">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="site.js" defer></script>
+  <title>Anam Assist — a face for Home Assistant</title>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="header wrap">
+  <a class="brand" href="./" aria-label="Anam Assist home"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 32 32"><path d="M5 15 16 5l11 10v12H5Z"/><path d="M11 16v5m5-8v11m5-8v5"/></svg><span>Anam Assist</span></a>
+  <nav aria-label="Main navigation"><a href="#install">Install</a><a href="#how-it-works">How it works</a><a href="#privacy">Privacy</a><a href="https://github.com/Smidge/anam-assist">GitHub <span aria-hidden="true">↗</span></a></nav>
+</header>
+<main id="main">
+  <section class="hero wrap" aria-labelledby="intro-title">
+    <div class="intro">
+      <h1 id="intro-title">Give your home<br>a face.</h1>
+      <p class="lead">Talk to an Anam avatar inside Home Assistant. Ask about your exposed devices, or opt in to light control.</p>
+      <p>Anam handles the conversation and avatar. Home Assistant runs the supported tools through your signed-in browser.</p>
+      <div class="actions"><a class="button primary" href="#install">Install the preview <span aria-hidden="true">↓</span></a><a class="text-link" href="https://github.com/Smidge/anam-assist">Explore the source <span aria-hidden="true">↗</span></a></div>
+      <p class="preview"><span class="status-dot" aria-hidden="true"></span>Experimental · Unofficial · MIT licensed</p>
+    </div>
+    <div class="flow-demo" aria-labelledby="demo-title">
+      <div class="demo-top"><h2 id="demo-title">Follow a request</h2><span>Illustration</span></div>
+      <div class="example-controls" hidden aria-label="Example request"><button type="button" data-example="read" aria-pressed="true">Read a sensor</button><button type="button" data-example="light" aria-pressed="false">Control a light</button></div>
+      <div id="example" aria-live="polite" aria-atomic="true">
+        <p class="request" id="request">“What’s the temperature in the living room?”</p>
+        <ol class="route">
+          <li><span class="route-dot" aria-hidden="true"></span><div><strong>Your browser</strong><p>You speak or type into the Anam Assist panel.</p></div></li>
+          <li><span class="route-dot" aria-hidden="true"></span><div><strong>Anam cloud</strong><p id="cloud-detail">The conversation requests an available state-reading tool.</p></div></li>
+          <li><span class="route-dot" aria-hidden="true"></span><div><strong>Home Assistant</strong><p id="ha-detail">Checks the session and reads Assist-exposed state.</p></div></li>
+        </ol>
+        <div class="reply"><span>Avatar response</span><p id="reply">“It’s 21 degrees in the living room.”</p></div>
+      </div>
+      <p class="demo-note">Illustrative data. This page doesn’t start a session, use your microphone, or connect to your home.</p>
+    </div>
+  </section>
+  <div class="facts-band"><dl class="facts wrap"><div><dt>Tested with</dt><dd>Home Assistant 2026.10.3</dd></div><div><dt>Runs in</dt><dd>Your HA browser sidebar</dd></div><div><dt>Starts in</dt><dd>Read-only mode</dd></div><div><dt>Requires</dt><dd>Anam account + HTTPS</dd></div></dl></div>
+  <div class="wrap content">
+    <section id="install" class="section split" aria-labelledby="install-title">
+      <div class="section-heading"><h2 id="install-title">Start with a question.<br>Then try a light.</h2><p>Manual installation is the verified route for this preview. Back up Home Assistant before adding a custom integration.</p><a class="text-link" href="https://github.com/Smidge/anam-assist/archive/refs/heads/main.zip">Download source ZIP <span aria-hidden="true">↓</span></a></div>
+      <div>
+        <aside class="notice"><h3>Before you begin</h3><p>You need a Home Assistant administrator account, an HTTPS connection, and an Anam API key with access to streaming sessions. <strong>Anam usage is billed separately.</strong> The open-source integration does not include cloud usage.</p></aside>
+        <ol class="installation">
+          <li><h3>Copy the integration</h3><p>Download and extract the repository. Copy the entire <code>custom_components/anam_assist</code> folder into your Home Assistant configuration’s <code>custom_components</code> directory. Create that directory if needed.</p><pre aria-label="Installation folder layout"><code>config/
+└── custom_components/
+    └── anam_assist/
+        ├── manifest.json
+        ├── __init__.py
+        └── …</code></pre><p class="small">The built browser bundle is included. You don’t need Node.js on your Home Assistant host.</p></li>
+          <li><h3>Restart and add Anam Assist</h3><p>Restart Home Assistant. Go to <strong>Settings → Devices &amp; services → Add integration</strong> and search for <strong>Anam Assist</strong>.</p></li>
+          <li><h3>Set up your avatar</h3><p>Enter your Anam API key in Home Assistant. Add a published persona ID, or leave it blank for the public Cara example. The saved persona is not modified: this integration supplies its own prompt and tools for each session.</p><p>Portrait is the default, at 768 × 1152. Use a portrait-capable Cara 4 avatar, or choose landscape in <strong>Reconfigure</strong> for an older avatar.</p></li>
+          <li><h3>Try a read-only session</h3><p>Review the entities you expose to Assist. Open <strong>Anam Assist</strong> in the sidebar, optionally select a screen location, and start a conversation. Ask about an exposed sensor. Turn off <strong>Use microphone</strong> to test by typing.</p></li>
+          <li><h3>Opt in to a light test</h3><p>End the session, select <strong>Allow light control</strong>, and start again. Ask for one exposed light by name. Check the physical result, then end the session when you’re done.</p></li>
+        </ol>
+        <details class="hacs-note"><summary>Installing through HACS?</summary><p>Repository metadata is included, but the full HACS install/update/removal lifecycle has not been validated. This project is not in the default HACS catalog. Use manual installation for the verified path.</p><p>If you want to test the custom-repository route, add <code>https://github.com/Smidge/anam-assist</code> with type <strong>Integration</strong>, following the <a href="https://www.hacs.xyz/docs/faq/custom_repositories/">HACS custom repository guide</a>. This is a custom integration, not a Supervisor app/add-on or a Lovelace card.</p></details>
+      </div>
+    </section>
+    <section id="how-it-works" class="section" aria-labelledby="how-title">
+      <div class="section-heading wide"><h2 id="how-title">Anam talks. Home Assistant acts.</h2><p>The browser connects the two. Your existing Assist pipelines stay in place; this adds a separate conversation panel using Home Assistant’s Assist LLM API.</p></div>
+      <div class="architecture">
+        <article><h3>Conversation &amp; media</h3><p>The browser uses the Anam JavaScript SDK for microphone audio, typed input and avatar playback. Anam handles speech recognition, the conversation model, voice and video.</p><p>Home Assistant creates a short-lived session token. The Anam API key stays in the server’s config entry and normal HA backups.</p></article>
+        <article><h3>Tool calls &amp; results</h3><p>Anam requests a client tool. The browser forwards it over Home Assistant’s authenticated WebSocket connection. The server checks the session, tool allowlist and arguments, then invokes the Assist API.</p><p>The result goes back to Anam before it answers. There is no public webhook, separate long-lived HA token, or HA server media relay.</p></article>
+      </div>
+      <div class="table-scroll"><table><caption>Current preview capabilities</caption><thead><tr><th scope="col">Task</th><th scope="col">Support</th></tr></thead><tbody><tr><th scope="row">Read exposed state and live context</th><td>Available in read-only sessions</td></tr><tr><th scope="row">Switch lights and set brightness</th><td>Opt in before each session; exposed lights only</td></tr><tr><th scope="row">Locks, covers, climate, switches, scripts and scenes</th><td>Not supported</td></tr><tr><th scope="row">Authenticated kiosk browser</th><td>Can open the panel; unattended recovery is not implemented</td></tr><tr><th scope="row">Wake words, casting and RTSP</th><td>Not supported</td></tr></tbody></table></div>
+    </section>
+    <section id="privacy" class="section privacy" aria-labelledby="privacy-title">
+      <div><h2 id="privacy-title">Know what leaves your home.</h2><p class="lead">This is a cloud-connected conversation. Anam receives audio or typed messages, Assist prompt context and tool results.</p><p><strong>Live context can include all exposed entity states</strong>, even if you ask about just one sensor. Review Assist exposure before connecting.</p><a class="text-link" href="https://github.com/Smidge/anam-assist/blob/main/SECURITY.md">Read the security model <span aria-hidden="true">↗</span></a></div>
+      <div class="boundaries"><h3>Limits enforced by the integration</h3><ul><li>Administrator access is required by the panel and server commands.</li><li>Read-only by default. Light control is an explicit choice for each session.</li><li>Bridge sessions are connection-bound and expire after 10 minutes.</li><li>Tool names, arguments and repeated call IDs are checked on the server.</li></ul><p>Session video recording and stored transcripts are disabled. That does not mean zero provider retention. Local transcripts remain in page memory.</p><p>Light changes can trigger your existing automations. Ending a session cannot undo a command already sent to a device.</p></div>
+    </section>
+    <section id="status" class="section split" aria-labelledby="status-title">
+      <div class="section-heading"><h2 id="status-title">A working preview.<br>Still an experiment.</h2><p>Evidence for this version, without a production-readiness claim.</p><a class="text-link" href="https://github.com/Smidge/anam-assist/actions">View CI results <span aria-hidden="true">↗</span></a></div>
+      <div><h3>What’s been checked</h3><p>50 backend tests and 36 Chromium/WebKit browser tests passed, alongside lint, a reproducible browser build and a runtime dependency audit.</p><p>Live testing on Home Assistant 2026.10.3 verified a portrait stream, a temperature query, and an exposed light turning off and back on. The owner confirmed both physical transitions. The final state matched the starting brightness.</p><h3>What’s still open</h3><p>Full clean-install HACS lifecycle testing, broader HA compatibility, and microphone/audio checks on physical mobile browsers. The live light check used typed commands. There has been no independent security audit.</p></div>
+    </section>
+    <section id="help" class="section split" aria-labelledby="help-title">
+      <div class="section-heading"><h2 id="help-title">A little help<br>getting connected.</h2><p>For bugs, include your HA version and a synthetic reproduction. Keep API keys, home-state payloads and real transcripts out of public issues.</p><a class="text-link" href="https://github.com/Smidge/anam-assist/issues">Report a bug <span aria-hidden="true">↗</span></a></div>
+      <div class="faq">
+        <details><summary>Anam Assist doesn’t appear in Add integration</summary><p>Check that the folder is exactly <code>custom_components/anam_assist</code> inside your HA configuration directory, with <code>manifest.json</code> directly inside it. Restart Home Assistant and refresh the browser.</p></details>
+        <details><summary>The microphone or video won’t start</summary><p>Open Home Assistant over HTTPS and allow microphone access when you want to speak. Try a typed session with <strong>Use microphone</strong> unchecked. If the browser blocks playback, use the panel’s playback control.</p><p>For an older avatar, try landscape through the integration’s Reconfigure action. Check the Anam account’s streaming access and usage allowance.</p></details>
+        <details><summary>The assistant can’t find my device</summary><p>Check that the entity is exposed to Assist and use its exact name. Read-only sessions cannot change devices. Even with light control enabled, unsupported device types remain unavailable.</p></details>
+        <details><summary>A tool timed out or the browser disconnected</summary><p>An action may have completed even if its result timed out. Check the device’s state before asking again. After a disconnect, start a new conversation; an old session cannot transfer control to a new connection.</p></details>
+        <details><summary>How do I update or remove it?</summary><p>End active sessions, back up your configuration, replace the whole component, restart Home Assistant and refresh the browser. Update frontend and backend together.</p><p>To remove it, delete the integration through <strong>Devices &amp; services</strong> before removing its folder. Your existing Assist pipelines remain unchanged.</p></details>
+        <details><summary>Is this fully local or free to run?</summary><p>No. The integration’s source is MIT licensed, but Anam supplies the cloud conversation and media. You need an Anam account and streaming usage. See <a href="https://anam.ai">Anam</a> for current account options.</p></details>
+      </div>
+    </section>
+    <section class="closing"><h2>Try it with one question.</h2><p>Start read-only, keep exposure deliberate, and tell us what you find.</p><a class="button primary" href="#install">Read the setup guide <span aria-hidden="true">↑</span></a></section>
+  </div>
+</main>
+<footer class="wrap footer"><div><strong>Anam Assist</strong><p>An unofficial community project by <a href="https://github.com/Smidge">Smidge</a>.<br>Not an official Anam, Home Assistant or HACS product.</p></div><nav aria-label="Project links"><a href="https://github.com/Smidge/anam-assist">Source</a><a href="https://github.com/Smidge/anam-assist/blob/main/LICENSE">License</a><a href="https://github.com/Smidge/anam-assist/security/advisories/new">Report a vulnerability</a></nav><p class="site-note">This documentation site uses no analytics or third-party embeds.</p></footer>
+</body>
+</html>

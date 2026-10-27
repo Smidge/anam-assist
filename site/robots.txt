@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://smidge.github.io/anam-assist/sitemap.xml

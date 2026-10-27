@@ -1,6 +1,8 @@
 # Anam Assist
 
 An unofficial Home Assistant integration with a talking Anam avatar in your browser.
+[Setup guide and architecture →](https://smidge.github.io/anam-assist/)
+
 Anam handles speech, conversation and video. Home Assistant runs a restricted set
 of Assist tools over the browser's authenticated connection.
 
