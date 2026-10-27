@@ -53,14 +53,21 @@ class AnamAssistPanel extends HTMLElement {
       </section><aside>
         <section class="settings"><h2>This conversation</h2><label for="room">Screen location</label><select id="room" name="room"><option value="">Ask which room</option></select>
           <label class="check"><input id="microphone" name="microphone" type="checkbox" checked>Use microphone</label>
-          <label class="check"><input id="control" name="control" type="checkbox">Allow light control</label>
-          <p class="muted" id="scope">Read-only until you enable light control. Control is limited to exposed lights through supported Assist tools.</p>
+          <label for="control">Home controls</label><select id="control" name="control" aria-describedby="scope"><option value="read_only">Read-only</option><option value="lights">Lights only</option><option value="assist">Assist controls</option></select>
+          <p class="muted" id="scope" aria-live="polite">Read exposed entity states without changing devices.</p>
           <p class="muted">Audio, typed messages and Assist context go to Anam. Context tools can return all exposed entity states. Recording and stored transcripts are off. Sessions end after 10 minutes or when you leave this page.</p>
         </section>
         <section><h2>Home activity</h2><p class="muted" id="empty">Tool calls and their results will appear here.</p><ol class="log" aria-live="polite" aria-label="Home activity"></ol></section>
       </aside></main>`;
     this.$('.skip').onclick = event => { event.preventDefault(); this.$('#conversation').focus(); };
     this.$('#menu').onclick = () => this.dispatchEvent(new Event('hass-toggle-menu', { bubbles: true, composed: true }));
+    this.$('#control').onchange = () => {
+      this.$('#scope').textContent = {
+        read_only: 'Read exposed entity states without changing devices.',
+        lights: 'Control exposed lights, including brightness.',
+        assist: 'Allow all tools supplied by Home Assistant’s Assist device-control API. Depending on your setup, this can operate locks, covers, heating and exposed scripts or scenes. Review Assist exposure first. Actions run without a separate confirmation.'
+      }[this.$('#control').value];
+    };
     this.$('#start').onclick = () => void this.start();
     this.$('#end').onclick = () => void this.stop();
     this.$('#interrupt').onclick = () => void this.clientAction('interruptPersona');
@@ -148,7 +155,7 @@ class AnamAssistPanel extends HTMLElement {
         if (generation !== this.generation) { mic.getTracks().forEach(t => t.stop()); return; }
         this.mic = mic;
       }
-      bridge = await hass.callWS({ type: 'anam_assist/start', allow_control: this.$('#control').checked, area_id: this.$('#room').value });
+      bridge = await hass.callWS({ type: 'anam_assist/start', control_mode: this.$('#control').value, area_id: this.$('#room').value });
       if (generation !== this.generation) {
         void Promise.resolve().then(() => hass.callWS({ type: 'anam_assist/stop', bridge_id: bridge.bridge_id })).catch(() => {}); return;
       }
@@ -211,7 +218,7 @@ class AnamAssistPanel extends HTMLElement {
       this.muted = false;
       this.$('#mute').textContent = 'Mute microphone';
       this.$('#mute').setAttribute('aria-pressed', 'false');
-      this.state('connected', this.$('#control').checked ? 'Connected · light control on' : 'Connected · read-only');
+      this.state('connected', { read_only: 'Connected · read-only', lights: 'Connected · lights only', assist: 'Connected · Assist controls' }[this.$('#control').value]);
       this.activity('Conversation', 'Connected');
     } catch (error) {
       if (generation !== this.generation) return;

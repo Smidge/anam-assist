@@ -92,6 +92,51 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
         args = self.api.async_call_tool.call_args[0][0].tool_args
         self.assertEqual(args["domain"], ["light"])
 
+    async def test_assist_control_passes_supported_domains_unchanged(self):
+        self.session["control_mode"] = "assist"
+        self.msg["name"] = self.tool.name = "intent__HassTurnOn"
+        self.tool.parameters = probatio.Schema({probatio.Optional("domain"): [str]})
+        for domain in ["switch", "scene", "script", "fan", "cover"]:
+            self.msg["call_id"] = domain
+            self.msg["arguments"] = {"domain": [domain]}
+            await self.call()
+            self.assertFalse(self.connection.result["error"])
+            self.assertEqual(
+                self.api.async_call_tool.call_args[0][0].tool_args, {"domain": [domain]}
+            )
+
+    async def test_assist_executes_only_tools_in_session_snapshot(self):
+        self.session["control_mode"] = "assist"
+        self.msg["name"] = self.tool.name = "climate__HassClimateSetTemperature"
+        await self.call()
+        self.api.async_call_tool.assert_not_called()
+        self.session["tools"] = bridge.tool_bindings([self.tool.name])
+        await self.call()
+        self.assertFalse(self.connection.result["error"])
+        self.api.async_call_tool.assert_awaited_once()
+
+    async def test_removed_assist_tool_cannot_execute(self):
+        self.session["control_mode"] = "assist"
+        self.api.tools = []
+        await self.call()
+        self.assertTrue(self.connection.result["error"])
+        self.api.async_call_tool.assert_not_called()
+
+    async def test_explicit_read_only_overrides_legacy_control(self):
+        self.session.update(control_mode="read_only", allow_control=True)
+        self.msg["name"] = "HassTurnOn"
+        await self.call()
+        self.api.async_call_tool.assert_not_called()
+
+    def test_modes_and_tool_selection(self):
+        self.assertEqual(bridge.control_mode({}), "read_only")
+        self.assertEqual(bridge.control_mode({"allow_control": True}), "lights")
+        self.assertEqual(bridge.control_mode({"control_mode": "assist"}), "assist")
+        api = SimpleNamespace(tools=[SimpleNamespace(name="fan__HassFanSetSpeed")])
+        self.assertEqual(bridge.allowed_tools(api, "assist"), {"fan__HassFanSetSpeed"})
+        self.assertNotIn("fan__HassFanSetSpeed", bridge.allowed_tools(api, "lights"))
+        self.assertNotIn("fan__HassFanSetSpeed", bridge.allowed_tools(api, "read_only"))
+
     async def test_queued_request_expires_without_execution(self):
         await self.session["lock"].acquire()
         real_timeout = asyncio.timeout

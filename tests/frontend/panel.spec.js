@@ -26,7 +26,7 @@ async function connect(page) {
 }
 
 test('read-only by default, named activity, text messages and safe transcript rendering', async ({ page }) => {
-  await expect(page.getByRole('checkbox', { name: 'Allow light control' })).not.toBeChecked();
+  await expect(page.getByRole('combobox', { name: 'Home controls' })).toHaveValue('read_only');
   await connect(page);
   await page.getByRole('textbox', { name: 'Message' }).fill('Temperature?');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
@@ -191,3 +191,22 @@ test('replacing HA connection revokes through the original connection', async ({
   expect(await page.evaluate(() => fixture.calls.some(c => c.type === 'anam_assist/stop'))).toBe(true);
   expect(await page.evaluate(() => fixture.newCalls.length)).toBe(0);
 });
+
+for (const mode of ['lights', 'assist']) {
+  test(`${mode} scope is explicit and fixed during the session`, async ({ page }) => {
+    const control = page.getByRole('combobox', { name: 'Home controls' });
+    await control.selectOption(mode);
+    if (mode === 'assist') await expect(page.locator('#scope')).toContainText('without a separate confirmation');
+    await page.getByRole('checkbox', { name: 'Use microphone' }).uncheck();
+    await page.getByRole('button', { name: 'Start conversation' }).click();
+    await expect.poll(() => page.evaluate(() => fixture.clients.length)).toBe(1);
+    expect(await page.evaluate(() => fixture.calls.find(c => c.type === 'anam_assist/start').control_mode)).toBe(mode);
+    await expect(control).toBeDisabled();
+    await page.evaluate(() => fixture.stream.resolve([fixture.makeStream()]));
+    await expect(page.getByRole('status')).toHaveText(mode === 'assist' ? 'Connected · Assist controls' : 'Connected · lights only');
+    await page.getByRole('button', { name: 'End', exact: true }).click();
+    await expect(control).toBeEnabled();
+    await page.reload();
+    await expect(page.getByRole('combobox', { name: 'Home controls' })).toHaveValue('read_only');
+  });
+}

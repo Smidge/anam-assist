@@ -3,7 +3,7 @@
 An unofficial Home Assistant integration with a talking Anam avatar in your browser.
 [Setup guide and architecture →](https://smidge.github.io/anam-assist/)
 
-Anam handles speech, conversation and video. Home Assistant runs a restricted set
+Anam handles speech, conversation and video. Home Assistant runs the selected scope
 of Assist tools over the browser's authenticated connection.
 
 **Experimental preview.** Tested against Home Assistant 2026.10.3. This is not an
@@ -41,14 +41,29 @@ not listed in HACS's default catalog; manual installation is the verified path.
 ## What it can do
 
 - Query Assist-exposed entity state and live context.
-- Optionally control exposed lights, including brightness. Control is off by
-  default and must be enabled before starting each session.
+- Choose a control scope before starting: **Read-only** (default), **Lights only**,
+  or **Assist controls**.
+- Assist controls supplies all tools offered by Home Assistant's built-in `assist`
+  device-control API. Depending on installed integrations and exposed entities,
+  this includes switches, fans, cover position, climate target temperature,
+  media playback/volume, and exposed scenes or scripts. The exact actions are
+  determined by Home Assistant; this is not a generic service-call API.
 - Accept voice or typed messages, mute the microphone, stop speech and show a
   local transcript and tool activity.
 - Use an optional room selection as conversation context.
 
-Locks, covers, climate, switches, scripts and scenes are excluded. Existing
-Home Assistant automations triggered by a light change can still have effects.
+**Assist controls can operate sensitive devices**, including locks and covers
+when Home Assistant offers those tools. Actions execute without a separate
+confirmation. Exposed scripts and scenes can affect devices beyond the entities
+you exposed. Review Assist exposure and those scripts before selecting this mode.
+Lights-only retains the original light restriction. Old clients cannot silently
+upgrade to Assist controls. Home Assistant automations can have additional effects.
+
+Try requests such as "set the study thermostat to 20 degrees", "pause the kitchen
+speaker", or "set the bedroom blind to 50%" after exposing the relevant entities.
+Music search/play requires a player that provides Home Assistant's search and play
+features. Unsupported capabilities are not added by this integration. The separate
+administrative `homeassistant` API is never selected.
 Room selection does not create an Assist satellite. Wake words, casting, RTSP
 streams and unattended kiosk recovery are not implemented. A kiosk can open
 `/anam-assist` on your Home Assistant origin, with authentication and browser
@@ -99,7 +114,9 @@ one exposed light on Home Assistant 2026.10.3. The owner physically confirmed of
 and back on; the integration restored the previous 100% brightness. Commands were
 typed into the browser, so this does not validate microphone input. A full
 clean-install HACS lifecycle and physical mobile-browser testing remain release
-checks. This preview makes no stable compatibility or production-readiness claim.
+checks. Broader Assist controls have synthetic backend coverage, including climate
+exposure revocation, but have not yet been physically verified. This preview makes
+no stable compatibility or production-readiness claim.
 
 Contributions should follow [CONTRIBUTING.md](CONTRIBUTING.md). Report
 vulnerabilities privately using [GitHub security advisories](https://github.com/Smidge/anam-assist/security/advisories/new).

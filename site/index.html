@@ -14,7 +14,7 @@
     />
     <meta
       property="og:description"
-      content="An Anam avatar in your Home Assistant sidebar. Read home state and opt in to light control. Open-source, unofficial, and experimental."
+      content="An Anam avatar in your Home Assistant sidebar. Read home state and opt in to Assist controls. Open-source, unofficial, and experimental."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://smidge.github.io/anam-assist/" />
@@ -47,7 +47,7 @@
           <h1 id="intro-title">Give your home<br />a face.</h1>
           <p class="lead">
             Talk to an Anam avatar inside Home Assistant. Ask about your exposed
-            devices, or opt in to light control.
+            devices, or opt in to Assist controls.
           </p>
           <p>
             Anam handles the conversation and avatar. Home Assistant runs the
@@ -227,7 +227,8 @@
               <li>
                 <h3>Opt in to a light test</h3>
                 <p>
-                  End the session, select <strong>Allow light control</strong>,
+                  End the session, choose <strong>Lights only</strong> under Home
+                  controls,
                   and start again. Ask for one exposed light by name. Check the
                   physical result, then end the session when you’re done.
                 </p>
@@ -312,9 +313,15 @@
                 </tr>
                 <tr>
                   <th scope="row">
-                    Locks, covers, climate, switches, scripts and scenes
+                    Media, fans, locks, covers, climate, switches, scripts and
+                    scenes
                   </th>
-                  <td>Not supported</td>
+                  <td>
+                    Available through Assist controls when Home Assistant supplies
+                    the tools. Review entity exposure first; actions have no separate
+                    confirmation. Exposed scripts and scenes may affect other devices.
+                    Broader physical-device testing is still pending.
+                  </td>
                 </tr>
                 <tr>
                   <th scope="row">Authenticated kiosk browser</th>
@@ -404,7 +411,7 @@
           <div>
             <h3>What’s been checked</h3>
             <p>
-              50 backend tests and 36 Chromium/WebKit browser tests passed,
+              57 backend tests and 40 Chromium/WebKit browser tests passed,
               alongside lint, a reproducible browser build and a runtime
               dependency audit.
             </p>

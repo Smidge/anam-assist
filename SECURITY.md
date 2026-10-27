@@ -15,10 +15,19 @@ security audit and is not a stable release.
   cannot isolate itself from a compromised HA installation or administrator.
 - Bridge IDs are random, connection-bound and expire after ten minutes. They
   grant only the tools selected at session creation. Tool names use stable opaque
-  identifiers; HA names remain server-side. Unknown IDs fail closed.
-- Control is opt-in per session and limited to exposed lights. Scenes, switches,
-  scripts, locks, covers and climate control are excluded. Existing automations
-  triggered by a light change can still have other effects.
+  identifiers; a prompt mapping resolves references in HA tool results. Unknown
+  IDs fail closed.
+- Read-only is the default. Lights-only keeps the original restricted allowlist.
+  Assist controls explicitly opts into the tools supplied by the built-in `assist`
+  device-control API, including integration-contributed tools. The administrative
+  `homeassistant` API is never selected. Installed integrations are trusted to
+  enforce their own tool contracts and exposure checks, as in native Assist.
+- Assist controls may operate locks, covers, heating, media, scripts and scenes.
+  There is no per-action confirmation. Scripts, scenes and automations can affect
+  unexposed devices indirectly. Entity exposure is not a sandbox for their effects.
+  A new session is required to receive newly available tools; removed tools and
+  changed exposure are checked again at execution. Legacy clients remain limited
+  to read-only or lights-only scope.
 - Exposure and tool availability are resolved using the Assist API at execution
   time. Sessions are checked again after asynchronous lookups. Ending a session
   prevents queued work from executing; actions already dispatched cannot be undone.
@@ -43,7 +52,9 @@ must enforce permissions regardless of what the model says.
 Automated tests cover argument and response bounds, replay protection, connection
 ownership, cancellation, real Home Assistant config-flow results and exposure
 filtering. A synthetic light service verifies that the real light intent rejects
-hidden entities and accepts exposed lights. Chromium and WebKit tests cover late
+hidden entities and accepts exposed lights. The real climate tool is exercised
+through the bridge with a synthetic service, including exposure revoked mid-session.
+Chromium and WebKit tests cover late
 media, reconnects, denied microphone access, playback failure and session expiry.
 These tests do not establish physical device behavior or full network transport.
 

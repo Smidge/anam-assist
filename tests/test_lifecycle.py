@@ -303,6 +303,133 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(calls[0]["entity_id"], "light.visible")
         self.assertEqual(calls[0]["brightness_pct"], 40)
 
+    async def test_real_climate_tool_through_bridge_respects_exposure_changes(self):
+        import time
+
+        from homeassistant.components.climate import intent as climate_intent
+        from homeassistant.components.climate import llm as climate_llm
+        from homeassistant.components.homeassistant import exposed_entities
+        from homeassistant.helpers import llm
+
+        await self.prepare_exposure()
+        for entity, exposed in [("climate.visible", True), ("climate.hidden", False)]:
+            self.hass.states.async_set(
+                entity, "heat", {"friendly_name": entity, "supported_features": 1}
+            )
+            exposed_entities.async_expose_entity(
+                self.hass, "conversation", entity, exposed
+            )
+        await climate_intent.async_setup_intents(self.hass)
+        tools = climate_llm.async_get_tools(self.hass, self.llm_context, "assist").tools
+        self.assertTrue(tools)
+        calls = []
+
+        async def record(call):
+            calls.append(call.data)
+
+        self.hass.services.async_register("climate", "set_temperature", record)
+        api = llm.APIInstance(
+            api=SimpleNamespace(hass=self.hass),
+            api_prompt="",
+            llm_context=self.llm_context,
+            tools=tools,
+        )
+        connection = SimpleNamespace(
+            user=SimpleNamespace(id="test", is_admin=True),
+            send_result=Mock(),
+            send_error=Mock(),
+        )
+        bindings = bridge.tool_bindings(t.name for t in tools)
+        self.hass.data[bridge.DOMAIN]["sessions"]["test"] = {
+            "connection": connection,
+            "expires": time.monotonic() + 60,
+            "control_mode": "assist",
+            "tools": bindings,
+            "calls": {},
+            "lock": asyncio.Lock(),
+        }
+
+        async def call(name, call_id):
+            with patch.object(bridge, "get_api", AsyncMock(return_value=api)):
+                await bridge.ws_tool.__wrapped__.__wrapped__(
+                    self.hass,
+                    connection,
+                    {
+                        "id": 1,
+                        "bridge_id": "test",
+                        "call_id": call_id,
+                        "name": next(iter(bindings)),
+                        "arguments": {"name": name, "temperature": 20},
+                    },
+                )
+            return connection.send_result.call_args.args[1]
+
+        self.assertTrue((await call("climate.hidden", "hidden"))["error"])
+        self.assertEqual(calls, [])
+        self.assertFalse((await call("climate.visible", "visible"))["error"])
+        self.assertEqual(calls[0]["entity_id"], "climate.visible")
+        self.assertEqual(calls[0]["temperature"], 20)
+        exposed_entities.async_expose_entity(
+            self.hass, "conversation", "climate.visible", False
+        )
+        self.assertTrue((await call("climate.visible", "revoked"))["error"])
+        self.assertEqual(len(calls), 1)
+
+    async def test_start_snapshots_assist_tools_and_uses_aliases(self):
+        import probatio
+
+        await self.prepare_exposure()
+        self.hass.data[bridge.DOMAIN]["entry"] = self.entry()
+        tools = [
+            SimpleNamespace(
+                name=name,
+                title="Example action",
+                description="Test action",
+                parameters=probatio.Schema({}),
+            )
+            for name in [
+                "homeassistant__GetLiveContext",
+                "media_player__play_media",
+                "climate__HassClimateSetTemperature",
+            ]
+        ]
+        api = SimpleNamespace(
+            tools=tools,
+            custom_serializer=None,
+            api_prompt="Use media_player__play_media.",
+        )
+        for mode in ["read_only", "lights", "assist"]:
+            connection = SimpleNamespace(
+                subscriptions={},
+                user=SimpleNamespace(id="test", is_admin=True),
+                send_result=Mock(),
+                send_error=Mock(),
+            )
+            with (
+                patch.object(bridge, "get_api", AsyncMock(return_value=api)),
+                patch.object(
+                    bridge,
+                    "request",
+                    AsyncMock(return_value={"sessionToken": "synthetic"}),
+                ) as request,
+            ):
+                await bridge.ws_start.__wrapped__.__wrapped__(
+                    self.hass,
+                    connection,
+                    {"id": 1, "control_mode": mode, "area_id": ""},
+                )
+            connection.send_error.assert_not_called()
+            result = connection.send_result.call_args.args[1]
+            self.assertEqual(len(result["tools"]), 3 if mode == "assist" else 1)
+            config = request.call_args.args[3]["personaConfig"]
+            if mode == "assist":
+                self.assertNotIn("Only exposed lights", config["systemPrompt"])
+                self.assertEqual(
+                    set(result["tools"]),
+                    set(bridge.tool_bindings(t.name for t in tools)),
+                )
+            bridge.remove_session(self.hass, result["bridge_id"])
+
     async def test_panel_registration_failure_leaves_entry_inactive(self):
         entry = self.entry()
         with (
