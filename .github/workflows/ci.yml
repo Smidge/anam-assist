@@ -2,6 +2,7 @@ name: Checks
 on:
   push:
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -20,7 +21,12 @@ jobs:
       - run: npm run build
       - name: Verify committed bundle
         run: git diff --exit-code -- custom_components/anam_assist/frontend
-      - run: npx playwright install --with-deps chromium webkit
+      - name: Install browser system dependencies
+        timeout-minutes: 5
+        run: npx playwright install-deps chromium webkit
+      - name: Download test browsers
+        timeout-minutes: 5
+        run: npx playwright install chromium webkit
       - run: npm run test:frontend
   backend:
     runs-on: ubuntu-24.04
