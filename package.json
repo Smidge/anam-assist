@@ -1,0 +1,17 @@
+{
+  "name": "anam-assist-panel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/panel.js --bundle --format=esm --minify --legal-comments=external --outfile=custom_components/anam_assist/frontend/panel.js",
+    "check": "node --check src/panel.js",
+    "test:frontend": "playwright test"
+  },
+  "dependencies": {
+    "@anam-ai/js-sdk": "4.29.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "esbuild": "0.25.12"
+  }
+}

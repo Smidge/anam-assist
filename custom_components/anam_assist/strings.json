@@ -1,0 +1,42 @@
+{
+  "title": "Anam Assist",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect Anam",
+        "description": "Enter an Anam API key. Leave Persona ID blank to try the built-in Cara avatar, or enter a published persona ID to use its face, voice and LLM without changing it. Audio and requested home data are sent to Anam. Session recordings and stored transcripts are disabled. Portrait output requires a portrait-capable Cara 4 avatar. Choose landscape for older avatars.",
+        "data": {
+          "api_key": "Anam API key",
+          "persona_id": "Persona ID (optional)",
+          "orientation": "Video orientation"
+        }
+      },
+      "reconfigure": {
+        "title": "Update Anam connection",
+        "description": "Leave the API key blank to keep the saved key. Portrait requires a portrait-capable Cara 4 avatar. Updating ends existing bridge sessions.",
+        "data": {
+          "api_key": "Anam API key",
+          "persona_id": "Persona ID (optional)",
+          "orientation": "Video orientation"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Update Anam connection",
+        "description": "Leave the API key blank to keep the saved key. Portrait requires a portrait-capable Cara 4 avatar. Updating ends existing bridge sessions.",
+        "data": {
+          "api_key": "Anam API key",
+          "persona_id": "Persona ID (optional)",
+          "orientation": "Video orientation"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not validate this configuration. Check connectivity, the persona and its support for the selected orientation.",
+      "invalid_auth": "Anam rejected the API key or its permissions.",
+      "invalid_persona": "Enter a valid persona UUID."
+    },
+    "abort": {
+      "single_instance_allowed": "Anam Assist is already configured."
+    }
+  }
+}
