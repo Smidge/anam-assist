@@ -6,7 +6,7 @@ of Assist tools over the browser's authenticated connection.
 
 **Experimental preview.** Tested against Home Assistant 2026.10.3. This is not an
 official Anam or Home Assistant product, and has not had an independent security
-audit. Physical light control is not yet verified. See [SECURITY.md](SECURITY.md).
+audit. See [SECURITY.md](SECURITY.md) for verification and remaining release checks.
 
 ## Install
 
@@ -92,8 +92,11 @@ reproducible commands. Tests use synthetic state and fake tool executors; they
 never operate a home. Browser tests replace the Anam SDK and Home Assistant
 connection with test doubles, so they do not establish paid sessions.
 
-Live read-only testing verified a native portrait stream and a temperature query.
-Physical light control and a full clean-install HACS lifecycle remain release
+Live testing verified a native portrait stream, a temperature query and control of
+one exposed light on Home Assistant 2026.10.3. The owner physically confirmed off
+and back on; the integration restored the previous 100% brightness. Commands were
+typed into the browser, so this does not validate microphone input. A full
+clean-install HACS lifecycle and physical mobile-browser testing remain release
 checks. This preview makes no stable compatibility or production-readiness claim.
 
 Contributions should follow [CONTRIBUTING.md](CONTRIBUTING.md). Report

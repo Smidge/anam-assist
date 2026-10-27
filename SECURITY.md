@@ -47,11 +47,15 @@ hidden entities and accepts exposed lights. Chromium and WebKit tests cover late
 media, reconnects, denied microphone access, playback failure and session expiry.
 These tests do not establish physical device behavior or full network transport.
 
+On 27 October 2026, a live browser session controlled one exposed light off and
+back on. The owner physically confirmed both transitions. The test used typed
+commands, restored the prior brightness, and ended with light control disabled.
+This is limited device evidence, not a security audit or a compatibility guarantee.
+
 Before a stable release:
 
 - Exercise a clean install, reload, upgrade and removal through a real Home
   Assistant instance, including HTTP/WebSocket authentication.
-- Verify a real light action and its physical result with the owner.
 - Check microphone/audio behavior on physical mobile browsers.
 - Complete HACS validation and compatibility testing beyond Home Assistant
   2026.10.3. No wider version support is claimed.
